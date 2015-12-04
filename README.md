@@ -5,4 +5,4 @@ Install:
 >npm install
 
 Run:
->node . <apikey> <event>
+>node . apikey event
