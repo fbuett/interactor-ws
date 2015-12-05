@@ -20,13 +20,11 @@
 	var messageID = 1;
 	var responseID = 1;
 	var cmd = 'AUTH:';
-	var intervalID =  0;
-
 	var eventCounter = 0;
 
 	// create Websocket
-	var ws = new WebSocket('wss://interactor.swisscom.ch/api/events/stream/websocket');
-	
+	var ws = new WebSocket('wss://interactor.swisscom.ch/api/events/stream/websocket');	
+
 	// log ws erros
 	ws.onerror = function (err) {
 	  console.log(err);
@@ -45,9 +43,10 @@
 	ws.onclose = function (event) {
 	  console.log('disconnected');
 
-	  // reestablish connection
+	  // reestablish connection - set cmd to AUTH: 
 	  cmd = 'AUTH:';
-	  ws.onopen();
+	  
+	  // reopen Websocket connection
 	};
 
 	// call on received websocket messsages
@@ -101,19 +100,10 @@
 	      // (we don't send a DATA cmd - we just use it as a switch)
 	      cmd = 'DATA';
 
-	      // set interval and send ping to avoid disconnect after 60sec
-	      intervalID = setInterval(function (){
-	        console.log('Ping');
-	        // ping not supported in broweser ws implementation; causes exeception
-	        ws.ping();
-	        }, 50000);
-
 	      break;   
 
 	    // in DATA receive mode
 	    case 'DATA':
-	      // clear ping interval trigger
-	      clearInterval(intervalID);
 	      
 	      // get data payload - weired format...
 	      ret = data.split('\n\n');
@@ -127,12 +117,6 @@
 	      // update event counter in "counter" element
 	      $('#counter').html($('<p>').text(eventCounter));
 
-	      // set interval and send ping to avoid disconnect after 60sec
-	      intervalID = setInterval(function (){
-	        console.log('Ping');
-	        // ping not supported in broweser ws implementation; causes exeception	        
-	        ws.ping();
-	        }, 50000);
 	      break;
 	    }
 	}
