@@ -1,0 +1,149 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <title>Interactor Websocket Demo</title>
+  <meta name="description" content="Interactor Websocket Demo">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+
+  <script>
+
+	// set required paramteres here
+	var apikey = '12345';
+	var eventCmd = 'ZONE'
+	
+	// define some variables	
+	var messageTxt = '';
+	var messageID = 1;
+	var responseID = 1;
+	var cmd = 'AUTH:';
+	var intervalID =  0;
+
+	var eventCounter = 0;
+
+	// create Websocket
+	var ws = new WebSocket('wss://interactor.swisscom.ch/api/events/stream/websocket');
+	
+	// log ws erros
+	ws.onerror = function (err) {
+	  console.log(err);
+	};
+
+	// open websocket connection
+	ws.onopen = function (event) {
+	  console.log('connected');
+
+	  // prepare AUTH message
+	  messageTxt = cmd+messageID+' '+apikey;
+	  console.log(messageTxt);
+	  ws.send(messageTxt);
+	};
+
+	ws.onclose = function (event) {
+	  console.log('disconnected');
+
+	  // reestablish connection
+	  cmd = 'AUTH:';
+	  ws.onopen();
+	};
+
+	// call on received websocket messsages
+	ws.onmessage = function (event) {
+	  
+	  data = event.data;
+
+	  // switch on last command sent
+	  switch (cmd) {
+	    
+	    // AUTH sent
+	    case 'AUTH:': 
+	      // split return message on colon
+	      ret = data.split(':');
+	      
+	      // check if return OK and message ID in correct order
+	      if (ret[0] == 'OK' && ret[1] == messageID) {
+	        //increase message ID for next cmd call
+	        messageID++;
+	      }
+	      else {
+	        console.log('Error: '+data); 
+	        break;
+	      }
+	      
+	      // set next cmd to SUB
+	      cmd = 'SUB:';
+	      
+	      // build SUB message
+	      messageTxt = cmd+messageID+' '+eventCmd; 
+	      console.log(messageTxt);
+	      ws.send(messageTxt);
+	      break;
+	    
+	    // SUB sent
+	    case 'SUB:':
+	      // split return message on colon
+	      ret = data.split(':');
+
+	      // check if return OK and message ID in correct order
+	      if (ret[0] == 'OK' && ret[1] == messageID) {
+	        //console.log(ret);
+	        messageID++;
+	      }
+	      else {
+	        console.log('Error: '+data); 
+	        break;
+	      }
+	      
+	      // set next cmd to DATA
+	      // (we don't send a DATA cmd - we just use it as a switch)
+	      cmd = 'DATA';
+
+	      // set interval and send ping to avoid disconnect after 60sec
+	      intervalID = setInterval(function (){
+	        console.log('Ping');
+	        // ping not supported in broweser ws implementation; causes exeception
+	        ws.ping();
+	        }, 50000);
+
+	      break;   
+
+	    // in DATA receive mode
+	    case 'DATA':
+	      // clear ping interval trigger
+	      clearInterval(intervalID);
+	      
+	      // get data payload - weired format...
+	      ret = data.split('\n\n');
+	      
+	      // log payload
+	      console.log(ret[1]);
+
+	      //increase event counter
+	      eventCounter++;
+
+	      // update event counter in "counter" element
+	      $('#counter').html($('<p>').text(eventCounter));
+
+	      // set interval and send ping to avoid disconnect after 60sec
+	      intervalID = setInterval(function (){
+	        console.log('Ping');
+	        // ping not supported in broweser ws implementation; causes exeception	        
+	        ws.ping();
+	        }, 50000);
+	      break;
+	    }
+	}
+ </script
+
+</head>
+
+<body style="font-family: Helvetica">
+	<h1>Interactor Websocket Demo</h1>
+	<div id="counter" style="color: red; font-size: 160px; position:absolute; left: 50%;
+    	transform: translate(-50%, 0);"><p>	0</div
+</body>
+
+</html>
