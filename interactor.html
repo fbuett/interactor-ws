@@ -1,18 +1,30 @@
 <!doctype html>
-
 <html lang="en">
 <head>
-  <meta charset="utf-8">
+	 <meta charset="utf-8">
 
-  <title>Interactor Websocket Demo</title>
-  <meta name="description" content="Interactor Websocket Demo">
+	<title>Interactor Websocket Demo</title>
+	<meta name="description" content="Interactor Websocket Demo">
 
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+	<!-- interactor.css -->
+	<link rel="stylesheet" type="text/css" href="interactor.css">
+	
+	<!-- JQuery -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
 
-  <script>
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+
+	<!-- Optional theme -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
+
+	<!-- Latest compiled and minified JavaScript -->
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+  	
+  	<script>
 
 	// set required paramteres here
-	var apikey = '12345';
+	var apikey = 'abcd';
 	var eventCmd = 'ZONE'
 	
 	// define some variables	
@@ -20,7 +32,8 @@
 	var messageID = 1;
 	var responseID = 1;
 	var cmd = 'AUTH:';
-	var eventCounter = 0;
+	var eventCounter1 = 0;
+	var eventCounter2 = 0;
 
 	// create Websocket
 	var ws = new WebSocket('wss://interactor.swisscom.ch/api/events/stream/websocket');	
@@ -32,21 +45,22 @@
 
 	// open websocket connection
 	ws.onopen = function (event) {
-	  console.log('connected');
+		console.log('connected');
 
-	  // prepare AUTH message
-	  messageTxt = cmd+messageID+' '+apikey;
-	  console.log(messageTxt);
-	  ws.send(messageTxt);
+		// prepare AUTH message
+		messageTxt = cmd+messageID+' '+apikey;
+		console.log(messageTxt);
+		ws.send(messageTxt);
+		
+		// update status information
+		$('#connectionStatus').html("<td colspan='2'class='success'>Connected</td>");
 	};
 
 	ws.onclose = function (event) {
-	  console.log('disconnected');
+		console.log('disconnected');
 
-	  // reestablish connection - set cmd to AUTH: 
-	  cmd = 'AUTH:';
-	  
-	  // reopen Websocket connection
+		// update status information
+		$('#connectionStatus').html("<td colspan='2'class='danger'>Disconnected</td>");
 	};
 
 	// call on received websocket messsages
@@ -107,27 +121,58 @@
 	      
 	      // get data payload - weired format...
 	      ret = data.split('\n\n');
-	      
-	      // log payload
 	      console.log(ret[1]);
 
-	      //increase event counter
-	      eventCounter++;
+	      // get Zone ID
+	      zoneID = JSON.parse(ret[1]).data.zone.id;
+	      console.log(zoneID);
+ 
+	      switch (zoneID) {
+	      	case 864:
+	      		//increase event counter
+		      	eventCounter1++;
 
-	      // update event counter in "counter" element
-	      $('#counter').html($('<p>').text(eventCounter));
+		     	// update event counter in "counter" element
+		      	$('#counter1').html($('<span>').text(eventCounter1));
+
+		      	break;
+		    case 1068:
+	      		//increase event counter
+		      	eventCounter2++;
+
+		     	// update event counter in "counter" element
+		      	$('#counter2').html($('<span>').text(eventCounter2));
+
+		      	break;
+	      }
 
 	      break;
 	    }
 	}
  </script
-
 </head>
 
 <body style="font-family: Helvetica">
-	<h1>Interactor Websocket Demo</h1>
-	<div id="counter" style="color: red; font-size: 160px; position:absolute; left: 50%;
-    	transform: translate(-50%, 0);"><p>	0</div
+	<div class="container">
+		<div class="jumbotron">
+			<h1>Swisscom Interactor Demo</h1>
+		</div>
+		<table class="table table-striped table-bordered table-hover">
+			<tr>
+				<th>Beacon 1</th>
+				<th>Beacon 2</th>
+			</tr>
+			<tr>
+				<td id="counter1">0</td>
+				<td id="counter2">0</td>
+		    </tr>
+		    <tr id="connectionStatus">
+		    	<td colspan="2"></td>
+		    </tr>
+		</table>
+		<footer>
+			© Swisscom Interactor 2015
+		</footer>
+	</div>
 </body>
-
 </html>
