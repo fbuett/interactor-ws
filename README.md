@@ -10,3 +10,6 @@ Install:
 
 Run:
 >node . apikey event
+
+API Key: get your API key from interactor.swisscom.ch
+Event types are: BEACON, BEACON_STATUS or ZONE

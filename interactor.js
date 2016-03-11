@@ -2,15 +2,18 @@
 
 // get API key from cmd line
 var apikey = process.argv[2];
-if (!apikey)
+if (!apikey) {
+  console.log("Usage: node interactor.js apikey eventtype");
   process.exit();
+}
 
 // get event type from cmd line
 // support event types are BEACON, BEACON_STATUS and ZONE
 var eventCmd = process.argv[3];
-if (!eventCmd)
+if (!eventCmd) {
+  console.log("Usage: node interactor.js apikey eventtype");
   process.exit();
-
+}
 
 // define some variables
 var messageTxt = '';
