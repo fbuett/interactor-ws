@@ -24,7 +24,7 @@
   	<script>
 
 	// set required paramteres here
-	var apikey = 'abcd';
+	var apikey = 'aca947d3-2af4-4221-b700-688fee598631';
 	var eventCmd = 'ZONE'
 	
 	// define some variables	
@@ -40,7 +40,9 @@
 
 	// log ws erros
 	ws.onerror = function (err) {
-	  console.log(err);
+		console.log(err);
+		// update status information
+		$('#connectionStatus').html("<td colspan='2'class='danger'>Disconnected</td>");
 	};
 
 	// open websocket connection
@@ -127,6 +129,7 @@
 	      zoneID = JSON.parse(ret[1]).data.zone.id;
 	      console.log(zoneID);
  
+	      //switch on (predefined) zone IDs
 	      switch (zoneID) {
 	      	case 864:
 	      		//increase event counter
@@ -135,6 +138,12 @@
 		     	// update event counter in "counter" element
 		      	$('#counter1').html($('<span>').text(eventCounter1));
 
+		      	try {
+			      	var xhr = new XMLHttpRequest();
+					xhr.open('GET', "http://rooms.scapp.io/sensors/BEACON-402/fire", false);
+					xhr.send(); 
+				} catch (err) {}
+
 		      	break;
 		    case 1068:
 	      		//increase event counter
@@ -142,6 +151,12 @@
 
 		     	// update event counter in "counter" element
 		      	$('#counter2').html($('<span>').text(eventCounter2));
+
+		      	try {
+			      	var xhr = new XMLHttpRequest();
+					xhr.open('GET', "http://rooms.scapp.io/sensors/BEACON-EBC-Ovaloffice/fire", false);
+					xhr.send();
+				} catch (err) {}
 
 		      	break;
 	      }
@@ -159,8 +174,8 @@
 		</div>
 		<table class="table table-striped table-bordered table-hover">
 			<tr>
-				<th>Beacon 1</th>
-				<th>Beacon 2</th>
+				<th>Zone A</th>
+				<th>Zone B</th>
 			</tr>
 			<tr>
 				<td id="counter1">0</td>
